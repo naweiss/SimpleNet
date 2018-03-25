@@ -5,6 +5,9 @@ import math
 def sigmoid(x):
     return 1 / (1 + math.exp(-x))
 
+def dsigmoid(x):
+    return sigmoid(x)*(1-sigmoid(x))
+
 class NeuralNetwork():
     def __init__(self, sizes):
         self.sizes = sizes
@@ -31,7 +34,41 @@ class NeuralNetwork():
                 output = output.apply(sigmoid)
             return output
         raise Exception("Invalid input length")
+        
+    def backpropagation(self, x, y):
+        output = x
+        layers = [x]
+        for weight, bias in zip(self.weights,self.biases):
+            output = weight*output+bias
+            layers.append(output)
+            output = output.apply(sigmoid)
+            layers.append(output)
+
+        delta_w, delta_b  = [], []
+        sigmoided, output  = layers.pop(), layers.pop()
+        delta = (sigmoided-y)**(output.apply(dsigmoid))
+        
+        for weight in reversed(self.weights):
+            sigmoided = layers.pop()
+            delta_b.insert(0,delta)
+            delta_w.insert(0,delta*(sigmoided.transpose()))
+            if layers:
+                output = layers.pop()
+                delta = (weight.transpose()*delta)**(output.apply(dsigmoid))
+        return (delta_w,delta_b)
+        
+        
+    def update(self, x, y):
+        delta_w, delta_b = self.backpropagation(x, y)
+        for i, w, b in zip(range(len(self.sizes)),delta_w, delta_b):
+            self.weights[i] -= w
+            self.biases[i]  -= b
 
 if __name__ == "__main__":
-    nn = NeuralNetwork([2,3,1])
+    nn = NeuralNetwork([2,2,1])
+    print(nn.feedforword([[0],[0]]))
+    x = Matrix(2, 1, [[0],[0]])
+    y = Matrix(1, 1, [[0]])
+    for i in range(1000):
+        nn.update(x, y)
     print(nn.feedforword([[0],[0]]))
