@@ -56,19 +56,32 @@ class NeuralNetwork():
                 output = layers.pop()
                 delta = (weight.transpose()*delta)**(output.apply(dsigmoid))
         return (delta_w,delta_b)
-        
-        
-    def update(self, x, y):
-        delta_w, delta_b = self.backpropagation(x, y)
-        for i, w, b in zip(range(len(self.sizes)),delta_w, delta_b):
-            self.weights[i] -= w
-            self.biases[i]  -= b
+
+    def update(self, batch):
+        for i in range(5000):
+            random.shuffle(batch)
+            for x,y in batch:
+                delta_w, delta_b = self.backpropagation(x, y)
+                for i, w, b in zip(range(len(self.sizes)),delta_w, delta_b):
+                    self.weights[i] -= w
+                    self.biases[i]  -= b
 
 if __name__ == "__main__":
-    nn = NeuralNetwork([2,2,1])
+    nn       = NeuralNetwork([2,2,1])
+    print("Not traind")
     print(nn.feedforword([[0],[0]]))
-    x = Matrix(2, 1, [[0],[0]])
-    y = Matrix(1, 1, [[0]])
-    for i in range(1000):
-        nn.update(x, y)
+    print(nn.feedforword([[0],[1]]))
+    print(nn.feedforword([[1],[0]]))
+    print(nn.feedforword([[1],[1]]))
+    
+    batch = [(Matrix(2,1,[[0],[0]]),Matrix(1,1,[[0]]))]
+    batch.append((Matrix(2,1,[[0],[1]]),Matrix(1,1,[[1]])))
+    batch.append((Matrix(2,1,[[1],[0]]),Matrix(1,1,[[1]])))
+    batch.append((Matrix(2,1,[[1],[1]]),Matrix(1,1,[[0]])))
+    nn.update(batch)
+    
+    print("Traind")
     print(nn.feedforword([[0],[0]]))
+    print(nn.feedforword([[0],[1]]))
+    print(nn.feedforword([[1],[0]]))
+    print(nn.feedforword([[1],[1]]))
