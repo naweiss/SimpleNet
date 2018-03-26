@@ -69,13 +69,16 @@ class NeuralNetwork():
         return (delta_w,delta_b)
 
     def update(self, batch):
+        for x,y in batch:
+            delta_w, delta_b = self.backpropagation(x, y)
+            for i, w, b in zip(range(len(self.sizes)),delta_w, delta_b):
+                self.weights[i] -= w
+                self.biases[i]  -= b
+                    
+    def train(self, batch):
         for i in range(5000):
             random.shuffle(batch)
-            for x,y in batch:
-                delta_w, delta_b = self.backpropagation(x, y)
-                for i, w, b in zip(range(len(self.sizes)),delta_w, delta_b):
-                    self.weights[i] -= w
-                    self.biases[i]  -= b
+            self.update(batch)
 
 if __name__ == "__main__":
     nn       = NeuralNetwork([2,2,1])
