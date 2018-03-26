@@ -5,6 +5,9 @@ class Matrix():
         self.data = data
             
     def transpose(self):
+        """
+        transpose Matrix
+        """
         new_data = []
         for i in range(self.m):
             new_row = []
@@ -14,15 +17,25 @@ class Matrix():
         return Matrix(self.m, self.n, new_data)
 
     def apply(self, func):
+        """ 
+        Element wise function mutation
+        x = f(x)
+        """
         if callable(func):
             new_data = list(map(lambda row: list(map(lambda col: func(col),row)),self.data))
             return Matrix(self.n, self.m, new_data)
         raise Exception("Variable must be callable")
 
     def __helper(row1, row2):
+        """
+        Element wise multiplication of lists
+        """
         return sum(map(lambda x: x[0]*x[1],zip(row1,row2)))
 
     def __repr__(self):
+        """ 
+        Pretty print matrix
+        """
         data_str = [[str(cell) for cell in row] for row in self.data]
         lens     = [max(map(len, col)) for col in zip(*data_str)]
         fmt      = '\t'.join('{{:{}}}'.format(x) for x in lens)
@@ -30,6 +43,9 @@ class Matrix():
         return '\n'.join(table)+'\n'
 
     def __add__(self, matrix):
+        """ 
+        Element wise addition
+        """
         if isinstance(matrix,Matrix):
             if self.n == matrix.n and self.m == matrix.m:
                 new_data = []
@@ -43,6 +59,9 @@ class Matrix():
             raise Exception("Invalid matrix addition")
 
     def __sub__(self,matrix):
+        """ 
+        Element wise substraction
+        """
         if isinstance(matrix,Matrix):
             if self.n == matrix.n and self.m == matrix.m:
                 new_data = []
@@ -56,6 +75,9 @@ class Matrix():
             raise Exception("Invalid matrix substraction")
 
     def __mul__(self, matrix):
+        """
+        Matrix multiplication
+        """
         if isinstance(matrix,Matrix):
             if self.m == matrix.n:
                 new_data = []
@@ -70,7 +92,10 @@ class Matrix():
             raise Exception("Invalid matrix multiplication")
         
     def __pow__(self, matrix):
-        """ hadamard product """
+        """ 
+        Hadamard product
+        Element wise multiplication
+        """
         if isinstance(matrix,Matrix):
             if self.n == matrix.n and self.m == matrix.m:
                 new_data = []

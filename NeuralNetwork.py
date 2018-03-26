@@ -35,7 +35,18 @@ class NeuralNetwork():
             return output
         raise Exception("Invalid input length")
         
-    def backpropagation(self, x, y):
+    def backpropagation(self, x, y
+        """
+        delta_new:
+
+                weight.transpose()
+                *
+                delta
+            **
+                output.apply(dsigmoid)
+        *
+            sigmoided.transpose()
+        """
         output = x
         layers = [x]
         for weight, bias in zip(self.weights,self.biases):
