@@ -68,7 +68,7 @@ class NeuralNetwork():
                 delta = (weight.transpose()*delta)**(output.apply(dsigmoid))
         return (delta_w,delta_b)
 
-    def update(self, batch):
+    def update(self, batch, lr):
         mean_w = [w.apply(lambda x: 0) for w in self.weights]
         mean_b = [b.apply(lambda x: 0) for b in self.biases]
 
@@ -81,18 +81,18 @@ class NeuralNetwork():
 
         # averaging all the deltas
         for i in range(len(self.sizes)-1):
-            mean_w[i] = mean_w[i].apply(lambda x: x/len(batch))
-            mean_b[i] = mean_b[i].apply(lambda x: x/len(batch))
+            mean_w[i] = mean_w[i].apply(lambda x: lr*x/len(batch))
+            mean_b[i] = mean_b[i].apply(lambda x: lr*x/len(batch))
     
         # subtract the estimated deltas
         for i, w, b in zip(range(len(self.sizes)),mean_w, mean_b):
             self.weights[i] -= w
             self.biases[i]  -= b
                     
-    def train(self, batch):
-        for i in range(5000):
+    def train(self, batch, lr, epochs):
+        for i in range(epochs):
             random.shuffle(batch)
-            self.update(batch)
+            self.update(batch, lr)
 
 if __name__ == "__main__":
     nn       = NeuralNetwork([2,2,1])
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     batch.append((Matrix(2,1,[[0],[1]]),Matrix(1,1,[[1]])))
     batch.append((Matrix(2,1,[[1],[0]]),Matrix(1,1,[[1]])))
     batch.append((Matrix(2,1,[[1],[1]]),Matrix(1,1,[[0]])))
-    nn.train(batch)
+    nn.train(batch, lr=2, ephocs=5000)
     
     print("Traind")
     print(nn.feedforword([[0],[0]]))
