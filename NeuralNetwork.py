@@ -68,7 +68,7 @@ class NeuralNetwork():
                 delta = (weight.transpose()*delta)**(output.apply(dsigmoid))
         return (delta_w,delta_b)
 
-    def update(self, batch, lr):
+    def update_mini_batch(self, batch, lr):
         mean_w = [w.apply(lambda x: 0) for w in self.weights]
         mean_b = [b.apply(lambda x: 0) for b in self.biases]
 
@@ -89,10 +89,18 @@ class NeuralNetwork():
             self.weights[i] -= w
             self.biases[i]  -= b
                     
-    def train(self, batch, lr, epochs):
+    def train(self, data, lr, epochs, mini_batch_size=0):
+        if mini_batch_size < 1:
+            mini_batch_size = len(data)
         for i in range(epochs):
-            random.shuffle(batch)
-            self.update(batch, lr)
+            random.shuffle(data)
+            mini_batches = [
+                data[k:k+mini_batch_size]
+                for k in range(0, len(data), mini_batch_size)
+            ]
+            for mini_batch in mini_batches:
+                self.update_mini_batch(mini_batch, lr)
+            
 
 if __name__ == "__main__":
     nn       = NeuralNetwork([2,2,1])
@@ -106,7 +114,7 @@ if __name__ == "__main__":
     batch.append((Matrix(2,1,[[0],[1]]),Matrix(1,1,[[1]])))
     batch.append((Matrix(2,1,[[1],[0]]),Matrix(1,1,[[1]])))
     batch.append((Matrix(2,1,[[1],[1]]),Matrix(1,1,[[0]])))
-    nn.train(batch, lr=2, ephocs=5000)
+    nn.train(batch, lr=2, epochs=5000, mini_batch_size=2)
     
     print("Traind")
     print(nn.feedforword([[0],[0]]))
