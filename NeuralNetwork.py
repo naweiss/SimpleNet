@@ -35,7 +35,7 @@ class NeuralNetwork():
             return output
         raise Exception("Invalid input length")
         
-    def backpropagation(self, x, y
+    def backpropagation(self, x, y):
         """
         delta_new:
 
@@ -69,11 +69,25 @@ class NeuralNetwork():
         return (delta_w,delta_b)
 
     def update(self, batch):
+        mean_w = [w.apply(lambda x: 0) for w in self.weights]
+        mean_b = [b.apply(lambda x: 0) for b in self.biases]
+
+        # summing all the deltas
         for x,y in batch:
             delta_w, delta_b = self.backpropagation(x, y)
-            for i, w, b in zip(range(len(self.sizes)),delta_w, delta_b):
-                self.weights[i] -= w
-                self.biases[i]  -= b
+            for i in range(len(self.sizes)-1):
+                mean_w[i] += delta_w[i]
+                mean_b[i] += delta_b[i]
+
+        # averaging all the deltas
+        for i in range(len(self.sizes)-1):
+            mean_w[i] = mean_w[i].apply(lambda x: x/len(batch))
+            mean_b[i] = mean_b[i].apply(lambda x: x/len(batch))
+    
+        # subtract the estimated deltas
+        for i, w, b in zip(range(len(self.sizes)),mean_w, mean_b):
+            self.weights[i] -= w
+            self.biases[i]  -= b
                     
     def train(self, batch):
         for i in range(5000):
@@ -92,7 +106,7 @@ if __name__ == "__main__":
     batch.append((Matrix(2,1,[[0],[1]]),Matrix(1,1,[[1]])))
     batch.append((Matrix(2,1,[[1],[0]]),Matrix(1,1,[[1]])))
     batch.append((Matrix(2,1,[[1],[1]]),Matrix(1,1,[[0]])))
-    nn.update(batch)
+    nn.train(batch)
     
     print("Traind")
     print(nn.feedforword([[0],[0]]))
