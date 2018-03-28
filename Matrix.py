@@ -40,7 +40,8 @@ class Matrix():
         lens     = [max(map(len, col)) for col in zip(*data_str)]
         fmt      = '\t'.join('{{:{}}}'.format(x) for x in lens)
         table    = [fmt.format(*row) for row in data_str]
-        return '\n'.join(table)+'\n'
+        sizes    = '['+str(self.n)+' x '+str(self.m)+']'
+        return '\n'.join([sizes]+table)+'\n'
 
     def __add__(self, matrix):
         """ 

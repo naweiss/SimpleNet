@@ -73,7 +73,8 @@ class NeuralNetwork():
         mean_b = [b.apply(lambda x: 0) for b in self.biases]
 
         # summing all the deltas
-        for x,y in batch:
+        for x, y in batch:
+            x, y = Matrix(len(x),1, x), Matrix(len(y),1, y)
             delta_w, delta_b = self.backpropagation(x, y)
             for i in range(len(self.sizes)-1):
                 mean_w[i] += delta_w[i]
@@ -89,7 +90,7 @@ class NeuralNetwork():
             self.weights[i] -= w
             self.biases[i]  -= b
                     
-    def train(self, data, lr, epochs, mini_batch_size=0):
+    def train(self, data, lr, epochs, mini_batch_size=0, verbose=False):
         if mini_batch_size < 1:
             mini_batch_size = len(data)
         for i in range(epochs):
@@ -100,24 +101,32 @@ class NeuralNetwork():
             ]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, lr)
-            
+            if verbose:
+                print("Epoch:",i+1)
 
 if __name__ == "__main__":
     nn       = NeuralNetwork([2,2,1])
-    print("Not traind")
-    print(nn.feedforword([[0],[0]]))
-    print(nn.feedforword([[0],[1]]))
-    print(nn.feedforword([[1],[0]]))
-    print(nn.feedforword([[1],[1]]))
+    inputs  = [
+        [[0],[0]],
+        [[0],[1]],
+        [[1],[0]],
+        [[1],[1]]
+    ]
+    outputs = [
+        [[0]],
+        [[1]],
+        [[1]],
+        [[0]]
+    ]
     
-    batch = [(Matrix(2,1,[[0],[0]]),Matrix(1,1,[[0]]))]
-    batch.append((Matrix(2,1,[[0],[1]]),Matrix(1,1,[[1]])))
-    batch.append((Matrix(2,1,[[1],[0]]),Matrix(1,1,[[1]])))
-    batch.append((Matrix(2,1,[[1],[1]]),Matrix(1,1,[[0]])))
-    nn.train(batch, lr=2, epochs=5000, mini_batch_size=2)
+    
+    print("Not traind")
+    for input in inputs:
+        print(nn.feedforword(input))
+    
+    batch = list(zip(inputs, outputs))
+    nn.train(batch, lr=2, epochs=5000, mini_batch_size=4)
     
     print("Traind")
-    print(nn.feedforword([[0],[0]]))
-    print(nn.feedforword([[0],[1]]))
-    print(nn.feedforword([[1],[0]]))
-    print(nn.feedforword([[1],[1]]))
+    for input in inputs:
+        print(nn.feedforword(input))
