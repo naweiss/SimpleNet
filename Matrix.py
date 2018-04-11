@@ -3,7 +3,7 @@ class Matrix():
         self.n = n
         self.m = m
         self.data = data
-            
+
     def transpose(self):
         """
         transpose Matrix
@@ -41,7 +41,7 @@ class Matrix():
         fmt      = '\t'.join('{{:{}}}'.format(x) for x in lens)
         table    = [fmt.format(*row) for row in data_str]
         sizes    = '['+str(self.n)+' x '+str(self.m)+']'
-        return '\n'.join([sizes]+table)+'\n'
+        return '\n'.join([sizes]+table)
 
     def __add__(self, matrix):
         """ 
@@ -107,7 +107,7 @@ class Matrix():
                     new_data.append(new_row)
                 return Matrix(self.n, self.m, new_data)
             raise Exception("Invalid matrix hadamard product")
-        
+
 if __name__ == "__main__":
     a = [[1,2],[3,4]]
     b = [[5,6,8],[1,8,9]]

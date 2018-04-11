@@ -28,7 +28,7 @@ class NeuralNetwork():
 
     def feedforword(self, inputs):
         if len(inputs) == self.sizes[0]:
-            output = Matrix(len(inputs),1, inputs)
+            output = Matrix(1,len(inputs), [inputs]).transpose()
             for i in range(len(self.sizes)-1):
                 output = self.weights[i]*output+self.biases[i]
                 output = output.apply(sigmoid)
@@ -74,7 +74,7 @@ class NeuralNetwork():
 
         # summing all the deltas
         for x, y in batch:
-            x, y = Matrix(len(x),1, x), Matrix(len(y),1, y)
+            x, y = Matrix(1,len(x), [x]).transpose(), Matrix(1,len(y), [y]).transpose()
             delta_w, delta_b = self.backpropagation(x, y)
             for i in range(len(self.sizes)-1):
                 mean_w[i] += delta_w[i]
@@ -105,28 +105,34 @@ class NeuralNetwork():
                 print("Epoch:",i+1)
 
 if __name__ == "__main__":
-    nn       = NeuralNetwork([2,2,1])
     inputs  = [
-        [[0],[0]],
-        [[0],[1]],
-        [[1],[0]],
-        [[1],[1]]
+        [1,1],
+        [0,0],
+        [0,1],
+        [1,0]
     ]
     outputs = [
-        [[0]],
-        [[1]],
-        [[1]],
-        [[0]]
+        [1,0],
+        [1,0],
+        [0,1],
+        [0,1]
     ]
-    
+
+    nn   = NeuralNetwork([2,4,2])
     
     print("Not traind")
-    for input in inputs:
-        print(nn.feedforword(input))
+    for j in range(len(inputs)):
+        output   = nn.feedforword(inputs[j])
+        got      = output.data.index(max(output.data))
+        expected = outputs[j].index(max(outputs[j]))
+        print(got,"<=>",expected)
     
     batch = list(zip(inputs, outputs))
-    nn.train(batch, lr=2, epochs=5000, mini_batch_size=4)
+    nn.train(batch, lr=0.8, epochs=5000, mini_batch_size=4)
     
     print("Traind")
-    for input in inputs:
-        print(nn.feedforword(input))
+    for j in range(len(inputs)):
+        output   = nn.feedforword(inputs[j])
+        got      = output.data.index(max(output.data))
+        expected = outputs[j].index(max(outputs[j]))
+        print(got,"<=>",expected)
