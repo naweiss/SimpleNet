@@ -34,12 +34,10 @@ class NeuralNetwork:
         ]
 
     def feedforword(self, input_data):
-        if len(input_data) != self.sizes[0]:
+        if input_data.n != self.sizes[0]:
             raise Exception("Invalid input length")
 
-        input_data = Matrix([input_data])
-
-        output = input_data.transpose()
+        output = input_data
         for i in range(len(self.sizes) - 1):
             output = (self.weights[i] * output) + self.biases[i]
             output = output.apply(sigmoid)
@@ -84,8 +82,6 @@ class NeuralNetwork:
 
         # summing all the deltas
         for input_data, output in batch:
-            input_data = Matrix([input_data]).transpose()
-            output = Matrix([output]).transpose()
             delta_weight, delta_bias = self.backpropagation(input_data, output)
             for i in range(len(self.sizes) - 1):
                 average_weights[i] += delta_weight[i]
@@ -122,23 +118,28 @@ class NeuralNetwork:
         for input_data, output in zip(inputs, outputs):
             training_output  = self.feedforword(input_data)
             max_output_index = training_output.data.index(max(training_output.data))
-            expected_index   = output.index(max(output))
+            expected_index   = output.data.index(max(output.data))
             print('got output index: {}, expected output index: {}'.format(max_output_index, expected_index))
+
+
+def Vector(data):
+    return Matrix([data]).transpose()
+
 
 if __name__ == "__main__":
     inputs  = [
-        [1,1],
-        [0,0],
-        [0,1],
-        [1,0]
+        Vector([1, 1]),
+        Vector([0, 0]),
+        Vector([0, 1]),
+        Vector([1, 0]),
     ]
     outputs = [
-        [1,0],
-        [1,0],
-        [0,1],
-        [0,1]
+        Vector([1, 0]),
+        Vector([1, 0]),
+        Vector([0, 1]),
+        Vector([0, 1]),
     ]
-    xor_network = NeuralNetwork([len(inputs[0]), 4, len(outputs[0])])
+    xor_network = NeuralNetwork([inputs[0].n, 4, outputs[0].n])
     
     print("Not traind")
     xor_network.evaluate(inputs, outputs)
