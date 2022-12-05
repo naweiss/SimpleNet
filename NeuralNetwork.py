@@ -14,16 +14,13 @@ def sigmoid_derivative(x):
 class NeuralNetwork:
     def __init__(self, sizes):
         self.sizes = sizes
-        self.weights = []
-        self.biases = []
-        for i in range(1, len(sizes)):
-            self.weights.append(Matrix(
-                self.__random_data(n=sizes[i], m=sizes[i-1])
-            ))
-            # All ones
-            self.biases.append(Matrix(
-                [[1]] * sizes[i]
-            ))
+        self.weights = [
+            Matrix(self.__random_data(n=next_layer_size, m=layer_size))
+            for layer_size, next_layer_size in zip(sizes, sizes[1:])
+        ]
+        self.biases = [
+            Matrix([[1]] * layer_size) for layer_size in sizes[1:]
+        ]
 
     @staticmethod
     def __random_data(n, m):
@@ -38,8 +35,8 @@ class NeuralNetwork:
             raise Exception("Invalid input length")
 
         output = input_data
-        for i in range(len(self.sizes) - 1):
-            output = (self.weights[i] * output) + self.biases[i]
+        for layer_weights, layer_biases in zip(self.weights, self.biases):
+            output = layer_weights * output + layer_biases 
             output = output.apply(sigmoid)
         return output
         
@@ -55,47 +52,47 @@ class NeuralNetwork:
         *
             sigmoided_output.transpose()
         """
-        layer_output = input_data
-        layers = [input_data]
-        for weight, bias in zip(self.weights,self.biases):
-            layer_output = (weight * layer_output) + bias
-            layers.append(layer_output)
-            layer_output = layer_output.apply(sigmoid)
-            layers.append(layer_output)
+        current_layer_output = input_data
+        layer_outputs = [input_data]
+        for layer_weights, layer_biases in zip(self.weights, self.biases):
+            mid_layer_output = (layer_weights * current_layer_output) + layer_biases
+            layer_outputs.append(mid_layer_output)
+            current_layer_output = mid_layer_output.apply(sigmoid)
+            layer_outputs.append(current_layer_output)
 
         delta_weight, delta_bias  = [], []
-        sigmoided_output, layer_output  = layers.pop(), layers.pop()
+        sigmoided_output, layer_output  = layer_outputs.pop(), layer_outputs.pop()
         delta = (sigmoided_output - output) ** layer_output.apply(sigmoid_derivative)
         
         for weight in reversed(self.weights):
-            sigmoided_output = layers.pop()
+            sigmoided_output = layer_outputs.pop()
             delta_bias.insert(0, delta)
             delta_weight.insert(0, delta * sigmoided_output.transpose())
-            if layers:
-                layer_output = layers.pop()
+            if layer_outputs:
+                layer_output = layer_outputs.pop()
                 delta = (weight.transpose() * delta) ** layer_output.apply(sigmoid_derivative)
         return (delta_weight, delta_bias)
 
     def update_mini_batch(self, batch, learning_rate):
-        average_weights = [weight.apply(lambda x: 0) for weight in self.weights]
-        average_bias = [bais.apply(lambda x: 0) for bais in self.biases]
+        average_weights = [weight.apply(lambda x: x * 0) for weight in self.weights]
+        average_biases = [bais.apply(lambda x: x * 0) for bais in self.biases]
 
         # summing all the deltas
         for input_data, output in batch:
             delta_weight, delta_bias = self.backpropagation(input_data, output)
             for i in range(len(self.sizes) - 1):
                 average_weights[i] += delta_weight[i]
-                average_bias[i]    += delta_bias[i]
+                average_biases[i]  += delta_bias[i]
 
         # averaging all the deltas
         for i in range(len(self.sizes) - 1):
             average_weights[i] = average_weights[i].apply(lambda x: (learning_rate * x) / len(batch))
-            average_bias[i]    = average_bias[i].apply(lambda x: (learning_rate * x) / len(batch))
+            average_biases[i]  = average_biases[i].apply(lambda x: (learning_rate * x) / len(batch))
     
         # subtract the estimated deltas
-        for i, weight, bais in zip(range(len(self.sizes)), average_weights, average_bias):
-            self.weights[i] -= weight
-            self.biases[i]  -= bais
+        for i in range(len(self.sizes) - 1):
+            self.weights[i] -= average_weights[i]
+            self.biases[i]  -= average_biases[i]
                     
     def train(self, inputs, outputs, learning_rate=0.5, epochs=100, mini_batch_size=None, verbose=False):
         if not mini_batch_size:
