@@ -113,9 +113,10 @@ class NeuralNetwork:
 
     def evaluate(self, inputs, outputs):
         for input_data, output in zip(inputs, outputs):
-            training_output  = self.feedforword(input_data)
-            max_output_index = training_output.data.index(max(training_output.data))
-            expected_index   = output.data.index(max(output.data))
+            training_output  = self.feedforword(input_data).to_list()
+            max_output_index = training_output.index(max(training_output))
+            output = output.to_list()
+            expected_index   = output.index(max(output))
             print('got output index: {}, expected output index: {}'.format(max_output_index, expected_index))
 
 

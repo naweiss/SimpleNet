@@ -111,6 +111,9 @@ class Matrix:
         ]
         return Matrix(new_data)
 
+    def to_list(self):
+        return self.data
+
 
 if __name__ == "__main__":
     x = Matrix([
