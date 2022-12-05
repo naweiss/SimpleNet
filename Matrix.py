@@ -1,18 +1,18 @@
+import numpy as np
+
 class Matrix:
     def __init__(self, data):
-        self.n = len(data)
-        self.m = len(data[0])
+        if not isinstance(data, np.ndarray):
+            data = np.array(data)
         self.data = data
+        self.n = self.data.shape[0]
+        self.m = self.data.shape[1]
 
     def transpose(self):
         """
         transpose Matrix
         """
-        new_data = [
-            [self.data[j][i] for j in range(self.n)]
-            for i in range(self.m)
-        ]
-        return Matrix(new_data)
+        return Matrix(np.transpose(self.data))
 
     def apply(self, func):
         """ 
@@ -21,10 +21,7 @@ class Matrix:
         if not callable(func):
             raise Exception("Variable must be callable")
 
-        new_data = [
-            [func(self.data[i][j]) for j in range(self.m)]
-            for i in range(self.n)
-        ]
+        new_data = func(self.data)
         return Matrix(new_data)
 
     def __repr__(self):
@@ -51,11 +48,7 @@ class Matrix:
         if self.n != matrix.n or self.m != matrix.m:
             raise Exception("Invalid matrix addition")
 
-        new_data = [
-            [self.data[i][j] + matrix.data[i][j] for j in range(matrix.m)]
-            for i in range(self.n)
-        ]
-        return Matrix(new_data)
+        return Matrix(self.data + matrix.data)
 
     def __sub__(self,matrix):
         """ 
@@ -66,11 +59,7 @@ class Matrix:
         if self.n != matrix.n or self.m != matrix.m:
             raise Exception("Invalid matrix substraction")
 
-        new_data = [
-            [self.data[i][j] - matrix.data[i][j] for j in range(matrix.m)]
-            for i in range(self.n)
-        ]
-        return Matrix(new_data)
+        return Matrix(self.data - matrix.data)
         
     def __pow__(self, matrix):
         """ 
@@ -82,11 +71,7 @@ class Matrix:
         if self.n != matrix.n or self.m != matrix.m:
             raise Exception("Invalid matrix hadamard product")
 
-        new_data = [
-            [self.data[i][j] * matrix.data[i][j] for j in range(matrix.m)]
-            for i in range(self.n)
-        ]
-        return Matrix(new_data)
+        return Matrix(self.data * matrix.data)
 
     @staticmethod
     def __element_wise_mul(row1, row2):
@@ -104,15 +89,10 @@ class Matrix:
         if self.m != matrix.n:
             raise Exception("Invalid matrix multiplication")
 
-        other = matrix.transpose()
-        new_data = [
-            [self.__element_wise_mul(self.data[i], other.data[j]) for j in range(matrix.m)]
-            for i in range(self.n)
-        ]
-        return Matrix(new_data)
+        return Matrix(np.matmul(self.data, matrix.data))
 
     def to_list(self):
-        return self.data
+        return self.data.tolist()
 
 
 if __name__ == "__main__":
